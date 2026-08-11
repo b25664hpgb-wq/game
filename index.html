@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>ピカピカ！でんきゲーム</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+body{
+  margin:0;
+  overflow:hidden;
+
+  font-family:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Hiragino Sans",
+  sans-serif;
+
+  background:#eaf9ff;
+}
+
+/* =========================
+   全体
+========================= */
+
+#game{
+
+  width:100vw;
+  height:100vh;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+
+  background:
+  linear-gradient(
+    #d9f5ff,
+    #ffffff
+  );
+
+  overflow:hidden;
+}
+
+
+/* =========================
+   タイトル
+========================= */
+
+#top{
+
+  width:100%;
+
+  text-align:center;
+
+  padding-top:
+  env(safe-area-inset-top);
+
+}
+
+h1{
+
+  margin:8px 0 0;
+
+  font-size:
+  clamp(24px,7vw,38px);
+
+  color:#24668a;
+
+}
+
+#level{
+
+  margin-top:4px;
+
+  font-size:
+  clamp(18px,5vw,25px);
+
+  font-weight:bold;
+
+  color:#5689a5;
+
+}
+
+
+/* =========================
+   回路エリア
+========================= */
+
+#circuit{
+
+  position:relative;
+
+  margin-top:8px;
+
+  width:min(95vw,700px);
+
+  height:42vh;
+
+  min-height:280px;
+
+  max-height:400px;
+
+  background:white;
+
+  border-radius:28px;
+
+  box-shadow:
+  0 7px 22px
+  rgba(0,0,0,.12);
+
+  overflow:hidden;
+
+}
+
+
+/* =========================
+   電池
+========================= */
+
+#battery{
+
+  position:absolute;
+
+  left:3%;
+
+  top:39%;
+
+  width:70px;
+
+  height:95px;
+
+  border-radius:15px;
+
+  background:
+  linear-gradient(
+    #444,
+    #222
+  );
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  font-size:42px;
+
+  z-index:5;
+
+}
+
+#battery::before{
+
+  content:"";
+
+  position:absolute;
+
+  top:-10px;
+
+  width:28px;
+  height:12px;
+
+  background:#333;
+
+  border-radius:5px;
+
+}
+
+
+/* =========================
+   配線
+========================= */
+
+.wire{
+
+  position:absolute;
+
+  height:14px;
+
+  background:#abb7bf;
+
+  border-radius:10px;
+
+  top:50%;
+
+  transform:
+  translateY(-50%);
+
+}
+
+#w1{
+
+  left:12%;
+
+  width:19%;
+
+}
+
+#w2{
+
+  left:31%;
+
+  width:20%;
+
+}
+
+#w3{
+
+  left:51%;
+
+  width:21%;
+
+}
+
+#w4{
+
+  left:72%;
+
+  width:19%;
+
+}
+
+
+/* 通電中 */
+
+.wire.on{
+
+  background:#ffd900;
+
+  box-shadow:
+  0 0 8px #ffd900,
+  0 0 20px #ffec72;
+
+}
+
+
+/* =========================
+   論理ブロック
+========================= */
+
+.logic{
+
+  position:absolute;
+
+  top:50%;
+
+  transform:
+  translate(-50%,-50%);
+
+  width:80px;
+
+  height:80px;
+
+  border-radius:22px;
+
+  background:#b7c0c5;
+
+  border:5px solid white;
+
+  box-shadow:
+  0 4px 10px
+  rgba(0,0,0,.2);
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  font-size:38px;
+
+  z-index:10;
+
+  transition:.2s;
+
+}
+
+#logic1{
+  left:31%;
+}
+
+#logic2{
+  left:52%;
+}
+
+#logic3{
+  left:73%;
+}
+
+.logic.on{
+
+  background:#60d979;
+
+  transform:
+  translate(-50%,-50%)
+  scale(1.08);
+
+}
+
+
+/* =========================
+   信号
+========================= */
+
+#signal{
+
+  position:absolute;
+
+  left:12%;
+
+  top:50%;
+
+  transform:
+  translateY(-50%);
+
+  width:30px;
+  height:30px;
+
+  border-radius:50%;
+
+  background:#fff500;
+
+  box-shadow:
+
+  0 0 10px #fff500,
+  0 0 25px #ffd900,
+  0 0 45px #ffd900;
+
+  z-index:30;
+
+  opacity:0;
+
+}
+
+
+/* =========================
+   ゴール
+========================= */
+
+#goal{
+
+  position:absolute;
+
+  right:1%;
+
+  top:50%;
+
+  transform:
+  translateY(-50%);
+
+  width:100px;
+
+  height:110px;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  font-size:65px;
+
+}
+
+
+/* 電球 */
+
+#bulb{
+
+  display:none;
+
+  transition:.3s;
+
+}
+
+#bulb.on{
+
+  transform:scale(1.25);
+
+  filter:
+  drop-shadow(
+    0 0 18px #ffd900
+  );
+
+}
+
+
+/* 扇風機 */
+
+#fan{
+
+  display:none;
+
+  transition:.3s;
+
+}
+
+#fan.spin{
+
+  animation:
+  spin .3s linear infinite;
+
+}
+
+@keyframes spin{
+
+  from{
+    transform:rotate(0);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+
+}
+
+
+/* 車 */
+
+#car{
+
+  display:none;
+
+  position:absolute;
+
+  font-size:70px;
+
+}
+
+#car.drive{
+
+  animation:
+  carDrive 2s ease-in forwards;
+
+}
+
+@keyframes carDrive{
+
+  0%{
+    right:0;
+  }
+
+  100%{
+    right:-170px;
+  }
+
+}
+
+
+/* =========================
+   メッセージ
+========================= */
+
+#message{
+
+  min-height:60px;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
+  padding:5px 10px;
+
+  font-size:
+  clamp(24px,7vw,36px);
+
+  font-weight:bold;
+
+  color:#245d7a;
+
+}
+
+
+/* =========================
+   ボタンエリア
+========================= */
+
+#buttons{
+
+  flex:1;
+
+  width:100%;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:16px;
+
+  padding:
+  5px 10px
+  calc(15px + env(safe-area-inset-bottom));
+
+}
+
+
+/* 大きなスイッチ */
+
+.switch{
+
+  position:relative;
+
+  width:
+  min(27vw,140px);
+
+  height:
+  min(27vw,140px);
+
+  max-height:140px;
+
+  border:none;
+
+  border-radius:50%;
+
+  font-size:
+  clamp(48px,12vw,70px);
+
+  box-shadow:
+
+  0 10px 0
+  rgba(0,0,0,.22),
+
+  0 14px 18px
+  rgba(0,0,0,.12);
+
+  transition:
+  transform .1s,
+  box-shadow .1s;
+
+}
+
+.switch:active{
+
+  transform:
+  translateY(7px);
+
+  box-shadow:
+  0 3px 0
+  rgba(0,0,0,.25);
+
+}
+
+#red{
+
+  background:#ff6464;
+
+}
+
+#blue{
+
+  background:#65aaff;
+
+}
+
+#green{
+
+  background:#6bd982;
+
+}
+
+.switch.active{
+
+  outline:
+  8px solid white;
+
+  box-shadow:
+
+  0 0 0 9px #ffe45c,
+
+  0 6px 0
+  rgba(0,0,0,.18);
+
+}
+
+
+/* =========================
+   キラキラ
+========================= */
+
+.sparkle{
+
+  position:absolute;
+
+  pointer-events:none;
+
+  font-size:30px;
+
+  animation:
+  sparkle .9s forwards;
+
+}
+
+@keyframes sparkle{
+
+  0%{
+
+    opacity:1;
+
+    transform:
+    scale(.3)
+    rotate(0);
+
+  }
+
+  100%{
+
+    opacity:0;
+
+    transform:
+    scale(1.8)
+    translateY(-70px)
+    rotate(180deg);
+
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="game">
+
+
+<!-- ===================
+     上部
+=================== -->
+
+<div id="top">
+
+<h1>
+⚡ ピカピカ！でんきゲーム
+</h1>
+
+<div id="level">
+⭐ レベル 1
+</div>
+
+</div>
+
+
+<!-- ===================
+     回路
+=================== -->
+
+<div id="circuit">
+
+
+<div id="battery">
+🔋
+</div>
+
+
+<div
+class="wire"
+id="w1">
+</div>
+
+<div
+class="wire"
+id="w2">
+</div>
+
+<div
+class="wire"
+id="w3">
+</div>
+
+<div
+class="wire"
+id="w4">
+</div>
+
+
+<div
+class="logic"
+id="logic1">
+⚡
+</div>
+
+<div
+class="logic"
+id="logic2">
+⚡
+</div>
+
+<div
+class="logic"
+id="logic3">
+⚡
+</div>
+
+
+<div id="signal">
+</div>
+
+
+<div id="goal">
+
+<div id="bulb">
+💡
+</div>
+
+<div id="fan">
+🌼
+</div>
+
+<div id="car">
+🚗
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- メッセージ -->
+
+<div id="message">
+
+🔴 おしてみよう！
+
+</div>
+
+
+<!-- ===================
+     操作ボタン
+=================== -->
+
+<div id="buttons">
+
+
+<button
+class="switch"
+id="red">
+
+🔴
+
+</button>
+
+
+<button
+class="switch"
+id="blue">
+
+🔵
+
+</button>
+
+
+<button
+class="switch"
+id="green">
+
+🟢
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+/* =========================
+   要素
+========================= */
+
+const redButton =
+document.getElementById("red");
+
+const blueButton =
+document.getElementById("blue");
+
+const greenButton =
+document.getElementById("green");
+
+
+const message =
+document.getElementById("message");
+
+const levelText =
+document.getElementById("level");
+
+
+const signal =
+document.getElementById("signal");
+
+
+const bulb =
+document.getElementById("bulb");
+
+const fan =
+document.getElementById("fan");
+
+const car =
+document.getElementById("car");
+
+
+const logic1 =
+document.getElementById("logic1");
+
+const logic2 =
+document.getElementById("logic2");
+
+const logic3 =
+document.getElementById("logic3");
+
+
+const wires = [
+
+document.getElementById("w1"),
+
+document.getElementById("w2"),
+
+document.getElementById("w3"),
+
+document.getElementById("w4")
+
+];
+
+
+/* =========================
+   状態
+========================= */
+
+let level = 1;
+
+let red = false;
+
+let blue = false;
+
+let green = false;
+
+let running = false;
+
+
+/* =========================
+   音
+========================= */
+
+let audioCtx;
+
+
+function tone(
+frequency,
+duration,
+volume=.18
+){
+
+if(!audioCtx){
+
+audioCtx =
+
+new (
+window.AudioContext ||
+window.webkitAudioContext
+)();
+
+}
+
+
+const osc =
+audioCtx.createOscillator();
+
+const gain =
+audioCtx.createGain();
+
+
+osc.connect(gain);
+
+gain.connect(
+audioCtx.destination
+);
+
+
+osc.type =
+"sine";
+
+osc.frequency.value =
+frequency;
+
+gain.gain.value =
+volume;
+
+
+osc.start();
+
+
+gain.gain.exponentialRampToValueAtTime(
+
+0.001,
+
+audioCtx.currentTime
++
+duration
+
+);
+
+
+osc.stop(
+
+audioCtx.currentTime
++
+duration
+
+);
+
+}
+
+
+/* ボタン音 */
+
+function buttonSound(){
+
+tone(
+350,
+.08,
+.1
+);
+
+}
+
+
+/* 信号音 */
+
+function electricSound(){
+
+tone(
+500,
+.08
+);
+
+setTimeout(()=>{
+
+tone(
+650,
+.08
+);
+
+},250);
+
+
+setTimeout(()=>{
+
+tone(
+800,
+.08
+);
+
+},500);
+
+}
+
+
+/* 成功音 */
+
+function successSound(){
+
+tone(
+650,
+.12
+);
+
+setTimeout(()=>{
+
+tone(
+850,
+.12
+);
+
+},120);
+
+
+setTimeout(()=>{
+
+tone(
+1100,
+.25
+);
+
+},240);
+
+}
+
+
+/* =========================
+   ボタン処理
+========================= */
+
+redButton.addEventListener(
+"click",
+()=>{
+
+if(running)return;
+
+red = !red;
+
+redButton.classList.toggle(
+"active",
+red
+);
+
+buttonSound();
+
+checkCircuit();
+
+});
+
+
+
+blueButton.addEventListener(
+"click",
+()=>{
+
+if(running)return;
+
+blue = !blue;
+
+blueButton.classList.toggle(
+"active",
+blue
+);
+
+buttonSound();
+
+checkCircuit();
+
+});
+
+
+
+greenButton.addEventListener(
+"click",
+()=>{
+
+if(running)return;
+
+green = !green;
+
+greenButton.classList.toggle(
+"active",
+green
+);
+
+buttonSound();
+
+checkCircuit();
+
+});
+
+
+/* =========================
+   回路判定
+========================= */
+
+function checkCircuit(){
+
+
+/* レベル1 */
+
+if(level === 1){
+
+logic1.classList.toggle(
+"on",
+red
+);
+
+if(red){
+
+sendSignal();
+
+}
+
+}
+
+
+/* レベル2 */
+
+if(level === 2){
+
+logic1.classList.toggle(
+"on",
+red
+);
+
+logic2.classList.toggle(
+"on",
+red && blue
+);
+
+if(
+red &&
+blue
+){
+
+sendSignal();
+
+}
+
+}
+
+
+/* レベル3 */
+
+if(level === 3){
+
+logic1.classList.toggle(
+"on",
+red
+);
+
+logic2.classList.toggle(
+"on",
+red && blue
+);
+
+logic3.classList.toggle(
+"on",
+red &&
+blue &&
+green
+);
+
+
+if(
+red &&
+blue &&
+green
+){
+
+sendSignal();
+
+}
+
+}
+
+}
+
+
+/* =========================
+   電気を流す
+========================= */
+
+function sendSignal(){
+
+if(running)return;
+
+running = true;
+
+
+message.textContent =
+"⚡ でんきが いくよ！";
+
+
+electricSound();
+
+
+signal.style.opacity = 1;
+
+
+/* 配線を順番に光らせる */
+
+setTimeout(()=>{
+
+wires[0].classList.add("on");
+
+},0);
+
+
+setTimeout(()=>{
+
+wires[1].classList.add("on");
+
+},350);
+
+
+setTimeout(()=>{
+
+wires[2].classList.add("on");
+
+},700);
+
+
+setTimeout(()=>{
+
+wires[3].classList.add("on");
+
+},1050);
+
+
+/* 黄色い信号 */
+
+signal.animate(
+
+[
+
+{
+left:"12%"
+},
+
+{
+left:"88%"
+}
+
+],
+
+{
+
+duration:1400,
+
+easing:"linear",
+
+fill:"forwards"
+
+}
+
+);
+
+
+/* ゴール */
+
+setTimeout(()=>{
+
+activateGoal();
+
+},1400);
+
+}
+
+
+/* =========================
+   ゴール動作
+========================= */
+
+function activateGoal(){
+
+
+successSound();
+
+
+/* レベル1 */
+
+if(level === 1){
+
+bulb.classList.add("on");
+
+message.textContent =
+"💡 ピカーン！";
+
+}
+
+
+/* レベル2 */
+
+if(level === 2){
+
+fan.classList.add("spin");
+
+message.textContent =
+"🌼 くるくる！";
+
+}
+
+
+/* レベル3 */
+
+if(level === 3){
+
+car.classList.add("drive");
+
+message.textContent =
+"🚗 しゅっぱーつ！";
+
+}
+
+
+makeSparkles();
+
+
+setTimeout(()=>{
+
+nextLevel();
+
+},2200);
+
+}
+
+
+/* =========================
+   キラキラ
+========================= */
+
+function makeSparkles(){
+
+const circuit =
+document.getElementById("circuit");
+
+
+for(
+let i=0;
+i<10;
+i++
+){
+
+const star =
+document.createElement("div");
+
+
+star.className =
+"sparkle";
+
+
+star.textContent =
+["⭐","✨","🌟"]
+[
+Math.floor(
+Math.random()*3
+)
+];
+
+
+star.style.left =
+60 +
+Math.random()*35
++
+"%";
+
+
+star.style.top =
+25 +
+Math.random()*50
++
+"%";
+
+
+circuit.appendChild(
+star
+);
+
+
+setTimeout(()=>{
+
+star.remove();
+
+},1000);
+
+}
+
+}
+
+
+/* =========================
+   次のレベル
+========================= */
+
+function nextLevel(){
+
+if(level < 3){
+
+level++;
+
+resetLevel();
+
+}
+
+else{
+
+message.textContent =
+"🎉 ぜんぶ できた！";
+
+
+setTimeout(()=>{
+
+level = 1;
+
+resetLevel();
+
+},2200);
+
+}
+
+}
+
+
+/* =========================
+   リセット
+========================= */
+
+function resetLevel(){
+
+running = false;
+
+red = false;
+
+blue = false;
+
+green = false;
+
+
+/* ボタン */
+
+redButton.classList.remove(
+"active"
+);
+
+blueButton.classList.remove(
+"active"
+);
+
+greenButton.classList.remove(
+"active"
+);
+
+
+/* 回路 */
+
+logic1.classList.remove(
+"on"
+);
+
+logic2.classList.remove(
+"on"
+);
+
+logic3.classList.remove(
+"on"
+);
+
+
+wires.forEach(
+wire =>
+wire.classList.remove("on")
+);
+
+
+/* 信号 */
+
+signal
+.getAnimations()
+.forEach(
+animation =>
+animation.cancel()
+);
+
+signal.style.opacity =
+0;
+
+signal.style.left =
+"12%";
+
+
+/* ゴール */
+
+bulb.classList.remove(
+"on"
+);
+
+fan.classList.remove(
+"spin"
+);
+
+car.classList.remove(
+"drive"
+);
+
+
+updateLevel();
+
+}
+
+
+/* =========================
+   レベル設定
+========================= */
+
+function updateLevel(){
+
+
+levelText.textContent =
+"⭐ レベル " + level;
+
+
+/* 全部非表示 */
+
+redButton.style.display =
+"none";
+
+blueButton.style.display =
+"none";
+
+greenButton.style.display =
+"none";
+
+
+logic1.style.display =
+"none";
+
+logic2.style.display =
+"none";
+
+logic3.style.display =
+"none";
+
+
+bulb.style.display =
+"none";
+
+fan.style.display =
+"none";
+
+car.style.display =
+"none";
+
+
+/* --------------------
+   LEVEL 1
+-------------------- */
+
+if(level === 1){
+
+message.textContent =
+"🔴 おしてみよう！";
+
+
+redButton.style.display =
+"block";
+
+
+logic1.style.display =
+"flex";
+
+logic1.textContent =
+"⚡";
+
+
+bulb.style.display =
+"block";
+
+}
+
+
+/* --------------------
+   LEVEL 2
+-------------------- */
+
+if(level === 2){
+
+message.textContent =
+"🔴 と 🔵 をつけよう！";
+
+
+redButton.style.display =
+"block";
+
+blueButton.style.display =
+"block";
+
+
+logic1.style.display =
+"flex";
+
+logic2.style.display =
+"flex";
+
+
+logic1.textContent =
+"🔴";
+
+logic2.textContent =
+"🔵";
+
+
+fan.style.display =
+"block";
+
+}
+
+
+/* --------------------
+   LEVEL 3
+-------------------- */
+
+if(level === 3){
+
+message.textContent =
+"🔴 🔵 🟢 をつけよう！";
+
+
+redButton.style.display =
+"block";
+
+blueButton.style.display =
+"block";
+
+greenButton.style.display =
+"block";
+
+
+logic1.style.display =
+"flex";
+
+logic2.style.display =
+"flex";
+
+logic3.style.display =
+"flex";
+
+
+logic1.textContent =
+"🔴";
+
+logic2.textContent =
+"🔵";
+
+logic3.textContent =
+"🟢";
+
+
+car.style.display =
+"block";
+
+}
+
+}
+
+
+/* 初期化 */
+
+resetLevel();
+
+</script>
+
+</body>
+</html>
