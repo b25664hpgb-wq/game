@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>ピカピカ回路あそび</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+body{
+  margin:0;
+  overflow:hidden;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Sans",
+    sans-serif;
+  background:#eef8ff;
+}
+
+#game{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 14px 24px;
+  background:
+    linear-gradient(
+      #dff5ff,
+      #f8fdff
+    );
+}
+
+h1{
+  margin:0;
+  font-size:clamp(25px,7vw,38px);
+  color:#22577a;
+  text-align:center;
+}
+
+#levelText{
+  margin-top:6px;
+  font-size:20px;
+  font-weight:bold;
+  color:#4f7c91;
+}
+
+#circuit{
+  position:relative;
+  width:min(94vw,700px);
+  height:330px;
+  background:white;
+  border-radius:28px;
+  box-shadow:0 8px 25px rgba(0,0,0,.12);
+  overflow:hidden;
+}
+
+/* 配線 */
+
+.wire{
+  position:absolute;
+  background:#aab7c1;
+  border-radius:10px;
+}
+
+#w1{
+  left:8%;
+  top:48%;
+  width:28%;
+  height:14px;
+}
+
+#w2{
+  left:36%;
+  top:48%;
+  width:28%;
+  height:14px;
+}
+
+#w3{
+  left:64%;
+  top:48%;
+  width:21%;
+  height:14px;
+}
+
+/* 信号 */
+
+#signal{
+  position:absolute;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:#ffe600;
+  box-shadow:
+    0 0 10px #ffe600,
+    0 0 25px #ffd000;
+  left:7%;
+  top:calc(48% - 8px);
+  opacity:0;
+  z-index:10;
+}
+
+/* ゲート */
+
+.gate{
+  position:absolute;
+  top:39%;
+  width:78px;
+  height:72px;
+  border-radius:20px;
+  background:#9aa7b1;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:38px;
+  font-weight:bold;
+  box-shadow:0 4px 8px rgba(0,0,0,.18);
+}
+
+#g1{
+  left:31%;
+}
+
+#g2{
+  left:59%;
+}
+
+.gate.ready{
+  background:#5ec576;
+  transform:scale(1.08);
+}
+
+/* 電球 */
+
+#lamp{
+  position:absolute;
+  right:4%;
+  top:34%;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:#d8dde1;
+  border:8px solid #77838c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:48px;
+  transition:.25s;
+}
+
+#lamp.on{
+  background:#fff34f;
+  box-shadow:
+    0 0 20px #fff34f,
+    0 0 50px #ffd900,
+    0 0 90px #ffd900;
+  transform:scale(1.15);
+}
+
+/* キャラクター */
+
+#face{
+  position:absolute;
+  right:7%;
+  top:10%;
+  font-size:50px;
+}
+
+/* ボタンエリア */
+
+#buttons{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:18px;
+  width:100%;
+  max-width:700px;
+}
+
+.bigButton{
+  width:120px;
+  height:120px;
+  border:none;
+  border-radius:50%;
+  font-size:50px;
+  box-shadow:
+    0 9px 0 rgba(0,0,0,.18);
+  transition:.1s;
+}
+
+.bigButton:active{
+  transform:translateY(6px);
+  box-shadow:
+    0 3px 0 rgba(0,0,0,.18);
+}
+
+.bigButton.active{
+  outline:8px solid white;
+  box-shadow:
+    0 0 0 8px #66df83,
+    0 4px 0 rgba(0,0,0,.15);
+}
+
+#redBtn{
+  background:#ff5d5d;
+}
+
+#blueBtn{
+  background:#55aaff;
+}
+
+#greenBtn{
+  background:#62d47a;
+}
+
+#message{
+  min-height:55px;
+  font-size:clamp(25px,7vw,38px);
+  font-weight:bold;
+  color:#28566d;
+  text-align:center;
+}
+
+#reset{
+  border:none;
+  border-radius:18px;
+  padding:12px 26px;
+  font-size:21px;
+  font-weight:bold;
+  background:#fff;
+  color:#3f6d83;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div>
+  <h1>💡 ピカピカ回路あそび</h1>
+  <div id="levelText">⭐ レベル 1</div>
+</div>
+
+<div id="circuit">
+
+  <div id="face">🐰</div>
+
+  <div class="wire" id="w1"></div>
+  <div class="wire" id="w2"></div>
+  <div class="wire" id="w3"></div>
+
+  <div class="gate" id="g1">→</div>
+  <div class="gate" id="g2">→</div>
+
+  <div id="signal"></div>
+
+  <div id="lamp">
+    💡
+  </div>
+
+</div>
+
+<div id="message">
+  🔴 おしてみよう！
+</div>
+
+<div id="buttons">
+
+  <button
+    class="bigButton"
+    id="redBtn">
+    🔴
+  </button>
+
+  <button
+    class="bigButton"
+    id="blueBtn">
+    🔵
+  </button>
+
+  <button
+    class="bigButton"
+    id="greenBtn">
+    🟢
+  </button>
+
+</div>
+
+<button id="reset">
+  🔄 もういちど
+</button>
+
+</div>
+
+<script>
+
+const redBtn =
+document.getElementById("redBtn");
+
+const blueBtn =
+document.getElementById("blueBtn");
+
+const greenBtn =
+document.getElementById("greenBtn");
+
+const signal =
+document.getElementById("signal");
+
+const lamp =
+document.getElementById("lamp");
+
+const message =
+document.getElementById("message");
+
+const levelText =
+document.getElementById("levelText");
+
+const g1 =
+document.getElementById("g1");
+
+const g2 =
+document.getElementById("g2");
+
+let level = 1;
+
+let red = false;
+let blue = false;
+let green = false;
+
+let running = false;
+
+let audioCtx;
+
+
+/************************
+ 音
+************************/
+
+function beep(freq,duration){
+
+  if(!audioCtx){
+
+    audioCtx =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+  }
+
+  const osc =
+    audioCtx.createOscillator();
+
+  const gain =
+    audioCtx.createGain();
+
+  osc.connect(gain);
+
+  gain.connect(
+    audioCtx.destination
+  );
+
+  osc.frequency.value =
+    freq;
+
+  osc.type =
+    "sine";
+
+  gain.gain.value =
+    0.18;
+
+  osc.start();
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioCtx.currentTime + duration
+  );
+
+  osc.stop(
+    audioCtx.currentTime + duration
+  );
+
+}
+
+function clickSound(){
+  beep(350,.08);
+}
+
+function successSound(){
+
+  beep(600,.12);
+
+  setTimeout(()=>{
+    beep(800,.12);
+  },120);
+
+  setTimeout(()=>{
+    beep(1100,.25);
+  },240);
+
+}
+
+
+/************************
+ ボタン
+************************/
+
+redBtn.onclick = ()=>{
+
+  if(running)return;
+
+  red = !red;
+
+  redBtn.classList.toggle(
+    "active",
+    red
+  );
+
+  clickSound();
+
+  checkLogic();
+
+};
+
+blueBtn.onclick = ()=>{
+
+  if(running)return;
+
+  blue = !blue;
+
+  blueBtn.classList.toggle(
+    "active",
+    blue
+  );
+
+  clickSound();
+
+  checkLogic();
+
+};
+
+greenBtn.onclick = ()=>{
+
+  if(running)return;
+
+  green = !green;
+
+  greenBtn.classList.toggle(
+    "active",
+    green
+  );
+
+  clickSound();
+
+  checkLogic();
+
+};
+
+
+/************************
+ 論理判定
+************************/
+
+function checkLogic(){
+
+  let ok = false;
+
+  if(level === 1){
+
+    ok = red;
+
+    g1.classList.toggle(
+      "ready",
+      red
+    );
+
+  }
+
+  if(level === 2){
+
+    ok =
+      red &&
+      blue;
+
+    g1.classList.toggle(
+      "ready",
+      red
+    );
+
+    g2.classList.toggle(
+      "ready",
+      red && blue
+    );
+
+  }
+
+  if(level === 3){
+
+    ok =
+      red &&
+      blue &&
+      green;
+
+    g1.classList.toggle(
+      "ready",
+      red && blue
+    );
+
+    g2.classList.toggle(
+      "ready",
+      red &&
+      blue &&
+      green
+    );
+
+  }
+
+  if(ok){
+    sendSignal();
+  }
+
+}
+
+
+/************************
+ 信号を流す
+************************/
+
+function sendSignal(){
+
+  if(running)return;
+
+  running = true;
+
+  message.textContent =
+    "⚡ ピカピカがいくよ！";
+
+  signal.style.opacity = 1;
+
+  signal.animate(
+    [
+      {
+        left:"7%"
+      },
+      {
+        left:"82%"
+      }
+    ],
+    {
+      duration:1600,
+      easing:"linear",
+      fill:"forwards"
+    }
+  );
+
+  setTimeout(()=>{
+
+    lamp.classList.add("on");
+
+    message.textContent =
+      "🎉 ピカーン！";
+
+    successSound();
+
+  },1600);
+
+  setTimeout(()=>{
+
+    nextLevel();
+
+  },3000);
+
+}
+
+
+/************************
+ 次のレベル
+************************/
+
+function nextLevel(){
+
+  if(level < 3){
+
+    level++;
+
+    resetGame();
+
+  }else{
+
+    message.textContent =
+      "🌟 すごい！ぜんぶできた！";
+
+    level = 1;
+
+    setTimeout(()=>{
+      resetGame();
+    },2200);
+
+  }
+
+}
+
+
+/************************
+ リセット
+************************/
+
+function resetGame(){
+
+  running = false;
+
+  red = false;
+  blue = false;
+  green = false;
+
+  redBtn.classList.remove(
+    "active"
+  );
+
+  blueBtn.classList.remove(
+    "active"
+  );
+
+  greenBtn.classList.remove(
+    "active"
+  );
+
+  lamp.classList.remove("on");
+
+  g1.classList.remove("ready");
+  g2.classList.remove("ready");
+
+  signal.getAnimations().forEach(
+    a=>a.cancel()
+  );
+
+  signal.style.opacity = 0;
+  signal.style.left = "7%";
+
+  levelText.textContent =
+    "⭐ レベル " + level;
+
+  updateLevel();
+
+}
+
+
+/************************
+ レベル表示
+************************/
+
+function updateLevel(){
+
+  if(level === 1){
+
+    message.textContent =
+      "🔴 おしてみよう！";
+
+    redBtn.style.display =
+      "block";
+
+    blueBtn.style.display =
+      "none";
+
+    greenBtn.style.display =
+      "none";
+
+    g1.textContent =
+      "→";
+
+    g2.style.display =
+      "none";
+
+  }
+
+  if(level === 2){
+
+    message.textContent =
+      "🔴 と 🔵 をつけよう！";
+
+    redBtn.style.display =
+      "block";
+
+    blueBtn.style.display =
+      "block";
+
+    greenBtn.style.display =
+      "none";
+
+    g1.textContent =
+      "＋";
+
+    g2.textContent =
+      "→";
+
+    g2.style.display =
+      "flex";
+
+  }
+
+  if(level === 3){
+
+    message.textContent =
+      "🔴 🔵 🟢 をつけよう！";
+
+    redBtn.style.display =
+      "block";
+
+    blueBtn.style.display =
+      "block";
+
+    greenBtn.style.display =
+      "block";
+
+    g1.textContent =
+      "＋";
+
+    g2.textContent =
+      "＋";
+
+    g2.style.display =
+      "flex";
+
+  }
+
+}
+
+document.getElementById(
+  "reset"
+).onclick = resetGame;
+
+resetGame();
+
+</script>
+
+</body>
+</html>
