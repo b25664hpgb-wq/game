@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#07111f" />
+<title>ロジック・スイッチ 30</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#10233c; --panel2:#153352; --line:#78ddff;
+  --text:#f5fbff; --muted:#b9cad8; --good:#4ef2a5; --bad:#ff6d80;
+  --zero:#31465b; --one:#ffcf4a; --accent:#74e1ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#16375b 0,#07111f 56%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;touch-action:manipulation}
+.app{max-width:900px;margin:auto;padding:14px 14px calc(28px + env(safe-area-inset-bottom))}
+.header{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:clamp(25px,7vw,38px);margin:8px 0}.badge{background:#0b192a;border:1px solid #2c5675;border-radius:999px;padding:8px 12px;font-weight:800}
+.progress{height:12px;background:#0a1727;border:1px solid #284764;border-radius:99px;overflow:hidden;margin:10px 0 14px}.bar{height:100%;width:0;background:linear-gradient(90deg,#56e6ff,#55efa9);transition:.3s}
+.card{background:linear-gradient(180deg,rgba(20,48,78,.96),rgba(11,29,50,.96));border:1px solid #2d5574;border-radius:22px;padding:16px;box-shadow:0 16px 40px #0007}
+.topline{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.qnum{font-size:20px;font-weight:900}.level{color:var(--muted);font-weight:700}
+.goal{text-align:center;margin:14px 0 8px}.goal strong{font-size:30px}.target{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;margin-left:8px;border-radius:16px;background:var(--one);color:#17202a;font-size:32px;font-weight:1000;box-shadow:0 0 25px #ffcf4a55}
+.circuit{margin:14px 0;background:#091827;border-radius:18px;border:1px solid #294967;padding:14px;overflow:hidden}.expr{text-align:center;font-weight:900;font-size:clamp(19px,5vw,28px);letter-spacing:.3px;color:#dff8ff;margin-bottom:14px}.diagram{display:flex;align-items:center;justify-content:center;gap:8px;min-height:110px;flex-wrap:wrap}.node,.gate,.outNode{min-width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:1000;font-size:20px;border:2px solid #4b7898;background:#132e49}.gate{min-width:74px;border-color:var(--line);color:var(--line)}.outNode{border-color:#fff}.wire{height:4px;width:34px;background:#47708c;border-radius:4px}.wire.on{background:var(--one);box-shadow:0 0 12px #ffcf4a88}.small{font-size:12px;color:var(--muted);font-weight:700}
+.inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}.switchWrap{text-align:center}.switchLabel{font-size:17px;font-weight:900;margin-bottom:7px}.switch{width:100%;min-height:76px;border:none;border-radius:19px;background:var(--zero);color:white;font-size:34px;font-weight:1000;box-shadow:inset 0 -5px 0 #0004;transition:.12s;cursor:pointer}.switch.on{background:var(--one);color:#1a2630;transform:translateY(2px);box-shadow:inset 0 -2px 0 #0003,0 0 20px #ffcf4a44}.switch span{display:block;font-size:12px;font-weight:900;opacity:.75}
+.status{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statusBox{background:#091827;border:1px solid #294967;border-radius:16px;padding:11px;text-align:center}.statusBox b{font-size:27px}.outputVal{display:inline-flex;width:44px;height:44px;border-radius:12px;align-items:center;justify-content:center;background:var(--zero);margin-left:6px}.outputVal.on{background:var(--one);color:#17202a}
+.buttons{display:flex;gap:10px;margin-top:14px}.mainBtn,.subBtn{flex:1;border:0;border-radius:16px;min-height:57px;font-size:18px;font-weight:1000;cursor:pointer}.mainBtn{background:linear-gradient(180deg,#6aebff,#2bb6e4);color:#042033}.subBtn{background:#213c55;color:white;border:1px solid #3c6584}.message{text-align:center;min-height:36px;margin-top:11px;font-size:20px;font-weight:1000}.message.good{color:var(--good)}.message.bad{color:var(--bad)}
+.help{margin-top:14px;background:#0b1b2e;border-radius:16px;padding:12px;color:var(--muted);font-size:14px;line-height:1.65}.help b{color:#fff}.legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.chip{padding:4px 8px;border-radius:8px;background:#17324e;color:#e9f8ff;font-weight:800}
+.end{text-align:center;padding:22px 8px}.end .big{font-size:54px}.end h2{font-size:31px}.score{font-size:24px;font-weight:900;margin:15px}.stars{font-size:42px;letter-spacing:4px}
+@media(max-width:520px){.inputs{grid-template-columns:repeat(3,1fr);gap:8px}.switch{min-height:68px}.card{padding:13px}.wire{width:18px}.gate{min-width:62px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header"><h1>⚡ ロジック・スイッチ 30</h1><div class="badge" id="scoreBadge">⭐ 0 / 30</div></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="card" id="game"></div>
+</div>
+<script>
+const questions = [
+ {e:'A AND B', t:1, d:'AND：両方が1なら1'},
+ {e:'A OR B', t:1, d:'OR：どちらかが1なら1'},
+ {e:'NOT A', t:1, d:'NOT：0と1を反対にする'},
+ {e:'A XOR B', t:1, d:'XOR：違うときだけ1'},
+ {e:'A AND B', t:0, d:'ANDの出力を0にしよう'},
+ {e:'A OR B', t:0, d:'ORの出力を0にしよう'},
+ {e:'NOT A', t:0, d:'NOTの出力を0にしよう'},
+ {e:'A XOR B', t:0, d:'XORの出力を0にしよう'},
+ {e:'(A AND B) OR C', t:1, d:'先にAND、そのあとOR'},
+ {e:'(A OR B) AND C', t:1, d:'先にOR、そのあとAND'},
+ {e:'(A XOR B) AND C', t:1, d:'XORの結果とCをAND'},
+ {e:'(A AND B) XOR C', t:1, d:'ANDの結果とCをXOR'},
+ {e:'NOT (A AND B)', t:1, d:'ANDしたあと反転（NAND）'},
+ {e:'NOT (A OR B)', t:1, d:'ORしたあと反転（NOR）'},
+ {e:'NOT (A XOR B)', t:1, d:'XORしたあと反転（XNOR）'},
+ {e:'(NOT A) AND B', t:1, d:'Aだけ反転してからAND'},
+ {e:'A AND (NOT B)', t:1, d:'Bだけ反転してからAND'},
+ {e:'(NOT A) OR B', t:0, d:'Aを反転してからOR'},
+ {e:'A OR (NOT B)', t:0, d:'Bを反転してからOR'},
+ {e:'(A XOR B) OR C', t:0, d:'XORの結果とCをOR'},
+ {e:'(A AND B) OR (A AND C)', t:1, d:'Aが入口になる分岐回路'},
+ {e:'(A OR B) AND (A OR C)', t:1, d:'2つのORを最後にAND'},
+ {e:'(A XOR B) XOR C', t:1, d:'1の個数が奇数なら1'},
+ {e:'NOT ((A AND B) OR C)', t:1, d:'最後に全体をNOT'},
+ {e:'NOT ((A OR B) AND C)', t:0, d:'複合回路を最後に反転'},
+ {e:'(A AND (NOT B)) OR C', t:1, d:'NOT・AND・ORの3段'},
+ {e:'(NOT A) XOR (B AND C)', t:1, d:'左はNOT、右はAND、最後にXOR'},
+ {e:'(A OR (NOT B)) AND C', t:1, d:'NOT→OR→AND'},
+ {e:'NOT ((A XOR B) AND C)', t:0, d:'XOR→AND→NOT'},
+ {e:'((A AND B) OR (NOT C)) XOR A', t:1, d:'最終問題！順番に計算しよう'}
+];
+let q=0, score=0, tries=0, solved=false;
+let vals={A:0,B:0,C:0};
+const game=document.getElementById('game');
+const bar=document.getElementById('bar');
+const scoreBadge=document.getElementById('scoreBadge');
+
+function bool(n){return n?1:0}
+function calc(expr){
+ let x=expr
+  .replaceAll('A',String(vals.A)).replaceAll('B',String(vals.B)).replaceAll('C',String(vals.C))
+  .replaceAll('NOT','!').replaceAll('AND','&&').replaceAll('XOR','!=').replaceAll('OR','||');
+ try{return bool(Function('return Number('+x+')')())}catch(e){return 0}
+}
+function usedVars(e){return ['A','B','C'].filter(v=>e.includes(v))}
+function gateNames(e){return ['NOT','AND','OR','XOR'].filter(g=>e.includes(g))}
+function level(i){return i<8?'レベル1：基本':i<20?'レベル2：組み合わせ':'レベル3：チャレンジ'}
+function render(){
+ if(q>=questions.length){return finish()}
+ solved=false; tries=0; vals={A:0,B:0,C:0};
+ const item=questions[q], vars=usedVars(item.e), gates=gateNames(item.e);
+ game.innerHTML=`
+ <div class="topline"><div class="qnum">問題 ${q+1} / 30</div><div class="level">${level(q)}</div></div>
+ <div class="goal">目標の出力を <strong>Y =</strong><span class="target">${item.t}</span> にしよう！</div>
+ <div class="circuit">
+   <div class="expr">Y = ${item.e}</div>
+   <div class="diagram">
+    ${vars.map(v=>`<div class="node">${v}<div class="small"></div></div>`).join('<div class="wire" data-wire></div>')}
+    <div class="wire" data-wire></div>
+    ${gates.map(g=>`<div class="gate">${g}</div><div class="wire" data-wire></div>`).join('')}
+    <div class="outNode">Y</div>
+   </div>
+ </div>
+ <div class="inputs">
+ ${vars.map(v=>`<div class="switchWrap"><div class="switchLabel">入力 ${v}</div><button class="switch" id="sw${v}" onclick="toggle('${v}')">0<span>OFF</span></button></div>`).join('')}
+ </div>
+ <div class="status">
+   <div class="statusBox">いまの出力<br><b>Y = <span class="outputVal" id="out">0</span></b></div>
+   <div class="statusBox">目標<br><b>Y = <span class="outputVal ${item.t?'on':''}">${item.t}</span></b></div>
+ </div>
+ <div class="buttons"><button class="mainBtn" onclick="check()">✅ これで決定！</button><button class="subBtn" onclick="resetInputs()">↩︎ 0に戻す</button></div>
+ <div class="message" id="msg"></div>
+ <div class="help"><b>ヒント：</b> ${item.d}<div class="legend"><span class="chip">AND = 両方1</span><span class="chip">OR = どちらか1</span><span class="chip">NOT = 反転</span><span class="chip">XOR = 違えば1</span></div></div>`;
+ update();
+ bar.style.width=(q/30*100)+'%';
+}
+function update(){
+ const item=questions[q]; if(!item)return;
+ usedVars(item.e).forEach(v=>{const b=document.getElementById('sw'+v);if(b){b.classList.toggle('on',vals[v]===1);b.innerHTML=vals[v]+`<span>${vals[v]?'ON':'OFF'}</span>`}});
+ const y=calc(item.e), out=document.getElementById('out'); if(out){out.textContent=y;out.classList.toggle('on',y===1)}
+ document.querySelectorAll('[data-wire]').forEach(w=>w.classList.toggle('on',y===1));
+}
+function toggle(v){if(solved)return; vals[v]=vals[v]?0:1; update(); beep(260+vals[v]*200,.055)}
+function resetInputs(){if(solved)return; vals={A:0,B:0,C:0}; update();}
+function check(){
+ if(solved)return;
+ tries++;
+ const item=questions[q], y=calc(item.e), msg=document.getElementById('msg');
+ if(y===item.t){
+   solved=true; score++; scoreBadge.textContent=`⭐ ${score} / 30`; msg.className='message good'; msg.textContent='🎉 せいかい！ 信号がゴールに届いた！'; successSound();
+   setTimeout(()=>{q++;render()},850);
+ }else{
+   msg.className='message bad'; msg.textContent='💡 まだ違うよ。スイッチを変えてみよう！'; failSound();
+ }
+}
+function finish(){
+ bar.style.width='100%';
+ const star=score>=28?'⭐⭐⭐':score>=22?'⭐⭐':'⭐';
+ game.innerHTML=`<div class="end"><div class="big">🏆</div><h2>30問クリア！</h2><div class="stars">${star}</div><div class="score">スコア ${score} / 30</div><p>0と1を使って、AND・OR・NOT・XOR回路を動かしました。</p><button class="mainBtn" onclick="restart()">もう一度あそぶ</button></div>`;
+}
+function restart(){q=0;score=0;scoreBadge.textContent='⭐ 0 / 30';render()}
+let audioCtx;
+function tone(freq,dur,delay=0){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=freq;g.gain.setValueAtTime(.06,audioCtx.currentTime+delay);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+delay+dur);o.start(audioCtx.currentTime+delay);o.stop(audioCtx.currentTime+delay+dur)}catch(e){}}
+function beep(f,d){tone(f,d)}
+function successSound(){tone(523,.12);tone(659,.12,.12);tone(784,.18,.24)}
+function failSound(){tone(180,.13);tone(130,.18,.13)}
+render();
+</script>
+</body>
+</html>
